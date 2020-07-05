@@ -63,7 +63,7 @@ fn print_message(msg: &str) -> Result<(), Error> {
     Ok(())
 }
 
-//#[test]
+#[test]
 fn bench_rate(){
     let total=120;
     println!("start");
