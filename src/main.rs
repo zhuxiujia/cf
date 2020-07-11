@@ -105,7 +105,7 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
             let gv = buffer[(size - i * 4) - 3] as i32;
             let bv = buffer[(size - i * 4) - 4] as i32;
 
-            if rgb_is_black(rv,gb,bv){
+            if rgb_is_black(rv,gv,bv){
                 have_black=true;
             }
 
