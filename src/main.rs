@@ -44,7 +44,11 @@ unsafe fn print_message() {
         println!("R_:{},G_:{},B_:{}", rv, gv,bv);
 
         //mouse::click(p.x as u32,p.y as u32);
-        if (rv - gv).abs() >= 40 && (rv - bv).abs() as u32 >= 40  && (gv-bv).abs()  as u32 <= 40 {
+
+        let rg:i32=(rv - gv);
+        let rb:i32=(rv - bv);
+        let gb:i32=(gv - bv);
+        if rg.abs() >= 40 && rb.abs() >= 40  && gb.abs() <= 40 {
             println!("may be red");
         }
 
