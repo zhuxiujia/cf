@@ -7,10 +7,6 @@ use winapi::_core::mem::size_of;
 use std::time::Duration;
 
 pub unsafe fn click_send_input(dx: u32, dy: u32) {
-    // mouse_event(MOUSEEVENTF_LEFTDOWN, dx, dy, 0, 0);
-    // sleep(Duration::from_millis(30));
-    // mouse_event(MOUSEEVENTF_LEFTUP, dx, dy, 0, 0);
-
     let mut input=INPUT{ type_: INPUT_MOUSE, u: INPUT_u::default()};
     let mi= input.u.mi_mut();
     mi.dx=0;

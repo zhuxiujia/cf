@@ -92,9 +92,6 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32,  step: usize)
         DeleteObject(MemDC as HGDIOBJ);
         ReleaseDC(hDeskTopWnd, hScreenDC);
 
-
-        let mut find_red_count = 0;
-
         let len = size / 4;
         for i in 0..len {
             if step != 0 && i % step != 0 {
@@ -103,14 +100,10 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32,  step: usize)
             let rv = buffer[(size - i * 4) - 2]as i32;
             let gv = buffer[(size - i * 4) - 3]as i32;
             let bv = buffer[(size - i * 4) - 4]as i32;
+            println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
             if is_red(rv,gv,bv,80,40)  {
-                find_red_count += 1;
-               // println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
-            }else{
-                find_red_count = 0;
-            }
-            if find_red_count >=3 {
                 return true;
+               // println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
             }
         }
     } else {
@@ -183,7 +176,7 @@ unsafe fn loop_find_color() {
 
 unsafe fn loop_find_cf_color() {
     loop {
-        let find=find_color(918, 600, 918+100, 600+17,   0);
+        let find=find_color(918, 570, 918+100, 570+57,   0);
         if find{
             click_send_input(0,0);
             println!("click");
