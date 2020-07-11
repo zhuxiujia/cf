@@ -45,7 +45,7 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
     let mut hBitmap: HBITMAP;
     hBitmap = CreateCompatibleBitmap(hScreenDC, screensize.cx, screensize.cy);
     let hOldBMP = SelectObject(MemDC, hBitmap as HGDIOBJ);
-    let bitBltSuccess = BitBlt(MemDC, 0, 0, screensize.cx, screensize.cy, hScreenDC, 0, 0, SRCCOPY);
+    let bitBltSuccess = BitBlt(MemDC, 0, 0, screensize.cx, screensize.cy, hScreenDC, rect.left, rect.top, SRCCOPY);
     if bitBltSuccess as i32 == 0 {
         return false;
     }
