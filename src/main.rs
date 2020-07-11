@@ -17,14 +17,7 @@ use std::ptr::null_mut;
 use crate::time_util::count_time_qps;
 
 #[cfg(windows)]
-fn print_message(msg: &str) -> Result<i32, Error> {
-    use std::ffi::OsStr;
-    use std::iter::once;
-    use std::os::windows::ffi::OsStrExt;
-    use winapi::um::winuser::{MB_OK, MessageBoxW};
-    let wide: Vec<u16> = OsStr::new(msg).encode_wide().chain(once(0)).collect();
-
-    let ret = unsafe {
+unsafe fn print_message()  {
         // let pixel=  GetPixel(null_mut(),0,512);
         // println!("{}",pixel);
         let mut p = POINT {
@@ -51,9 +44,6 @@ fn print_message(msg: &str) -> Result<i32, Error> {
 
             sleep(Duration::from_secs(1));
         }
-        MessageBoxW(null_mut(), wide.as_ptr(), wide.as_ptr(), MB_OK)
-    };
-    if ret == 0 { Err(Error::last_os_error()) } else { Ok(ret) }
 }
 
 
@@ -100,5 +90,5 @@ fn bench_rate(){
 
 fn main() {
     //bench_rate();
-    print_message("Hello, world!").unwrap();
+     unsafe { print_message(); }
 }
