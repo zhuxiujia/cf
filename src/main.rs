@@ -194,6 +194,7 @@ unsafe fn loop_find_cf_color() {
 }
 
 fn main() {
+    println!("now start!");
     //bench_rate();
     unsafe { loop_find_cf_color(); }
 }
