@@ -93,7 +93,7 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32,  step: usize)
         ReleaseDC(hDeskTopWnd, hScreenDC);
 
 
-        let mut find_red_count = i32;
+        let mut find_red_count = 0;
 
         let len = size / 4;
         for i in 0..len {
