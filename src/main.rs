@@ -18,7 +18,7 @@ use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCom
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
 
 use crate::time_util::count_time_qps;
-use crate::util::{pixel_to_rgb, write_file, is_red, click_send_input};
+use crate::util::{click_send_input, is_red, pixel_to_rgb, write_file};
 
 pub mod time_util;
 pub mod util;
@@ -26,7 +26,7 @@ pub mod util;
 
 /// step: 步长
 #[cfg(windows)]
-unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32,  step: usize) -> bool{
+unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) -> bool {
     let hDeskTopWnd = GetDesktopWindow();//获得屏幕的HWND
     let hScreenDC = GetDC(hDeskTopWnd);//获得屏幕的HDC
     let MemDC = CreateCompatibleDC(hScreenDC);//创建一个内存中的DC
@@ -97,13 +97,21 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32,  step: usize)
             if step != 0 && i % step != 0 {
                 continue;
             }
-            let rv = buffer[(size - i * 4) - 2]as i32;
-            let gv = buffer[(size - i * 4) - 3]as i32;
-            let bv = buffer[(size - i * 4) - 4]as i32;
-            println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
-            if is_red(rv,gv,bv,80,40)  {
+            let rv = buffer[(size - i * 4) - 2] as i32;
+            let gv = buffer[(size - i * 4) - 3] as i32;
+            let bv = buffer[(size - i * 4) - 4] as i32;
+            // if is_red(rv,gv,bv,80,40)  {
+            //     return true;
+            //    // println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
+            // }
+
+            let rv_diff = rv - 165;
+            let gv_diff = gv - 58;
+            let bv_diff = bv - 48;
+            let diff=30;
+            if rv_diff.abs() <= diff && gv_diff.abs() <= diff && bv_diff.abs() <= diff {
+                println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
                 return true;
-               // println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
             }
         }
     } else {
@@ -169,16 +177,17 @@ fn bench_rate() {
 
 unsafe fn loop_find_color() {
     loop {
-        find_color(0, 0, 10, 100,   0);
+        find_color(0, 0, 10, 100, 0);
     }
 }
 
 
 unsafe fn loop_find_cf_color() {
     loop {
-        let find=find_color(918, 570, 918+100, 570+57,   0);
-        if find{
-            click_send_input(0,0);
+        //let find =  find_color(0, 0, 10, 100, 0);;
+        let find = find_color(918, 570, 918 + 100, 570 + 57, 0);
+        if find {
+            click_send_input(0, 0);
             println!("click");
         }
     }
