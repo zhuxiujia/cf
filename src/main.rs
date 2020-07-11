@@ -41,12 +41,6 @@ unsafe fn print_message() {
 }
 
 
-#[cfg(not(windows))]
-fn print_message(msg: &str) -> Result<(), Error> {
-    println!("{}", msg);
-    Ok(())
-}
-
 #[test]
 fn bench_rate() {
     let total = 120;
