@@ -12,6 +12,7 @@ pub unsafe fn click_send_input(dx: u32, dy: u32) {
     mi.dx=0;
     mi.dy=0;
     mi.dwFlags= MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
+    mi.time = 50;
 
     SendInput(1, &mut input, size_of::<INPUT>() as i32);
 }
