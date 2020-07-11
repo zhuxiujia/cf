@@ -11,20 +11,8 @@ pub unsafe fn click_send_input(dx: u32, dy: u32) {
     let mi = input.u.mi_mut();
     mi.dx = 0;
     mi.dy = 0;
-    mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
+    mi.dwFlags = MOUSEEVENTF_MOVE  | MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
     SendInput(1, &mut input, size_of::<INPUT>() as i32);
-    drop(input);
-
-
-    sleep(Duration::from_millis(40));
-
-    let mut input = INPUT { type_: INPUT_MOUSE, u: INPUT_u::default() };
-    let mi = input.u.mi_mut();
-    mi.dx = 0;
-    mi.dy = 0;
-    mi.dwFlags = MOUSEEVENTF_LEFTUP;
-    SendInput(1, &mut input, size_of::<INPUT>() as i32);
-    drop(input);
 }
 
 pub unsafe fn click_mouse_event(dx: u32, dy: u32) {
