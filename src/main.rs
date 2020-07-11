@@ -18,7 +18,7 @@ use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCom
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
 
 use crate::time_util::count_time_qps;
-use crate::util::{click_send_input, is_red, pixel_to_rgb, write_file, rgb_is_red, rgb_is_black};
+use crate::util::{click_send_input, is_red, pixel_to_rgb, rgb_is_black, rgb_is_red, write_file};
 
 pub mod time_util;
 pub mod util;
@@ -93,7 +93,8 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         ReleaseDC(hDeskTopWnd, hScreenDC);
 
 
-        let mut have_black =false;
+        let mut have_black = false;
+        let mut last_i = 0;
 
 
         let len = size / 4;
@@ -105,11 +106,12 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
             let gv = buffer[(size - i * 4) - 3] as i32;
             let bv = buffer[(size - i * 4) - 4] as i32;
 
-            if rgb_is_black(rv,gv,bv){
-                have_black=true;
+            if rgb_is_black(rv, gv, bv) {
+                have_black = true;
+                last_i = i;
             }
 
-            if rgb_is_red(rv,gv,bv) && have_black {
+            if rgb_is_red(rv, gv, bv) && have_black && last_i + 1 == i {
                 //println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
                 return true;
             }
