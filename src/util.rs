@@ -21,7 +21,6 @@ pub unsafe fn click_send_input(dx: u32, dy: u32) {
     let mi= input.u.mi_mut();
     mi.dx=0;
     mi.dy=0;
-    mi.dwFlags= MOUSEEVENTF_LEFTDOWN;
     mi.dwFlags= MOUSEEVENTF_LEFTUP;
     SendInput(1, &mut input, size_of::<INPUT>() as i32);
     drop(input);
