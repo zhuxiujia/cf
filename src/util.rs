@@ -1,4 +1,6 @@
 use winapi::um::winuser::{GetCursorPos, GetDC, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP};
+use std::fs::File;
+use std::io::Write;
 
 pub unsafe fn click(dx: u32, dy: u32) {
     mouse_event(MOUSEEVENTF_LEFTDOWN, dx, dy, 0, 0);
@@ -25,4 +27,10 @@ pub  fn pixel_to_rgb(pixel: u32) -> (i32,i32,i32) {
         println!("may be red");
     }
     return (rv,gv,bv);
+}
+
+
+pub fn write_file(buf:&Vec<u8>){
+    let mut file =File::create("test.jpg").unwrap();
+    file.write_all(buf);
 }

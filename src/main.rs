@@ -18,7 +18,7 @@ use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCom
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
 
 use crate::time_util::count_time_qps;
-use crate::util::pixel_to_rgb;
+use crate::util::{pixel_to_rgb, write_file};
 
 pub mod time_util;
 pub mod util;
@@ -32,10 +32,11 @@ unsafe fn find_color() {
     let mut rect: RECT = RECT {
         left: 0,
         top: 0,
-        right: 2560,
-        bottom: 1440,
+        right: 100,
+        bottom: 100,
     };
-    GetWindowRect(hDeskTopWnd, &mut rect);
+   //获取屏幕尺寸
+   // GetWindowRect(hDeskTopWnd, &mut rect);
     let mut screensize = SIZE { cx: 0, cy: 0 };
     screensize.cx = rect.right - rect.left;
     screensize.cy = rect.bottom - rect.top;
@@ -82,10 +83,11 @@ unsafe fn find_color() {
         for _ in 0..size{
             buffer.push(0 as u8);
         }
-        let mut slice:*mut [u8]= buffer.as_mut_slice()  as *mut [u8];
+        let mut slice= buffer.as_mut_slice()  as *mut [u8];
         //第二次调用GetDIBits取图片流数据
         result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32,  slice as *mut c_void, &mut bitInfo, DIB_RGB_COLORS);
 
+        write_file(&buffer);
 
         println!("success");
     }
@@ -149,7 +151,5 @@ fn bench_rate() {
 fn main() {
 
     //bench_rate();
-    unsafe { find_color(); }
-
     unsafe { find_color(); }
 }
