@@ -2,6 +2,7 @@
 extern crate winapi;
 
 pub mod time_util;
+pub mod mouse;
 
 use std::io::Error;
 use std::thread::sleep;
@@ -44,9 +45,7 @@ fn print_message(msg: &str) -> Result<i32, Error> {
 
             println!("R:{},G:{},B:{}", rv,gv,bv);
 
-
-            mouse_event(MOUSEEVENTF_LEFTDOWN,p.x as u32,p.y as u32,0,0);
-            mouse_event(MOUSEEVENTF_LEFTUP,p.x as u32,p.y as u32,0,0);
+            mouse::click(p.x as u32,p.y as u32);
 
 
 
@@ -56,6 +55,10 @@ fn print_message(msg: &str) -> Result<i32, Error> {
     };
     if ret == 0 { Err(Error::last_os_error()) } else { Ok(ret) }
 }
+
+
+
+
 
 #[cfg(not(windows))]
 fn print_message(msg: &str) -> Result<(), Error> {
