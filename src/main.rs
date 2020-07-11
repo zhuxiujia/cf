@@ -24,12 +24,7 @@ pub mod time_util;
 pub mod util;
 
 
-///
-///
-///
-/// diff: 误差值
 /// step: 步长
-///
 #[cfg(windows)]
 unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32,  step: usize) -> bool{
     let hDeskTopWnd = GetDesktopWindow();//获得屏幕的HWND
