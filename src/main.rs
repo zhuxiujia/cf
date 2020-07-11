@@ -52,8 +52,8 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
     let mut bitInfo: BITMAPINFO = BITMAPINFO {
         bmiHeader: BITMAPINFOHEADER {
             biSize: size_of::<BITMAPINFOHEADER>() as u32,
-            biWidth: rect.right - rect.left,
-            biHeight: rect.bottom - rect.top,
+            biWidth: screensize.cx,
+            biHeight: screensize.cy,
             biPlanes: 1,
             biBitCount: 32,
             biCompression: BI_RGB,
@@ -75,8 +75,6 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
     let mut result = 0;
 //第一次调用GetDIBits获得图片的大小
     result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, null_mut(), &mut bitInfo, DIB_RGB_COLORS);
-    bitInfo.bmiHeader.biCompression = BI_RGB;
-    bitInfo.bmiHeader.biPlanes = 1;
     if result != 0 {
         //do something
         let size: usize = bitInfo.bmiHeader.biSizeImage as usize;
