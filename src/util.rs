@@ -2,9 +2,12 @@ use std::fs::File;
 use std::io::Write;
 
 use winapi::um::winuser::{GetCursorPos, GetDC, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP};
+use std::thread::sleep;
+use winapi::_core::time::Duration;
 
 pub unsafe fn click(dx: u32, dy: u32) {
     mouse_event(MOUSEEVENTF_LEFTDOWN, dx, dy, 0, 0);
+    sleep(Duration::from_millis(30));
     mouse_event(MOUSEEVENTF_LEFTUP, dx, dy, 0, 0);
 }
 
