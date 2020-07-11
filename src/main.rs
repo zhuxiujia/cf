@@ -1,22 +1,99 @@
 #[cfg(windows)]
 extern crate winapi;
 
-use std::io::Error;
+use std::ffi::CString;
+use std::io::{Bytes, Error};
 use std::ptr::null_mut;
 use std::thread::sleep;
 use std::time::SystemTime;
 
+use winapi::_core::mem::size_of;
+use winapi::_core::str::Chars;
 use winapi::_core::time::Duration;
-use winapi::shared::windef::POINT;
+use winapi::ctypes::{c_char, c_void};
+use winapi::shared::minwindef::BYTE;
+use winapi::shared::windef::{HBITMAP, HBITMAP__, HGDIOBJ, POINT, RECT, SIZE};
 use winapi::um::wingdi;
-use winapi::um::wingdi::{GetBValue, GetGValue, GetPixel, GetRValue, GetTextColor, GetDIBits};
-use winapi::um::winuser::{GetCursorPos, GetDC, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, GetWindowDC, GetDesktopWindow, GetTopWindow};
+use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCompatibleBitmap, CreateCompatibleDC, DeleteObject, DIB_RGB_COLORS, GetBValue, GetDIBits, GetGValue, GetPixel, GetRValue, GetTextColor, RGBQUAD, SelectObject, SRCCOPY};
+use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
 
 use crate::time_util::count_time_qps;
 use crate::util::pixel_to_rgb;
 
 pub mod time_util;
 pub mod util;
+
+
+#[cfg(windows)]
+unsafe fn find_color() {
+    let hDeskTopWnd = GetDesktopWindow();//获得屏幕的HWND
+    let hScreenDC = GetDC(hDeskTopWnd);//获得屏幕的HDC
+    let MemDC = CreateCompatibleDC(hScreenDC);//创建一个内存中的DC
+    let mut rect: RECT = RECT {
+        left: 0,
+        top: 0,
+        right: 2560,
+        bottom: 1440,
+    };
+    GetWindowRect(hDeskTopWnd, &mut rect);
+    let mut screensize = SIZE { cx: 0, cy: 0 };
+    screensize.cx = rect.right - rect.left;
+    screensize.cy = rect.bottom - rect.top;
+
+    let mut hBitmap: HBITMAP;
+    hBitmap = CreateCompatibleBitmap(hScreenDC, screensize.cx, screensize.cy);
+    let hOldBMP = SelectObject(MemDC, hBitmap as HGDIOBJ);
+    let bitBltSuccess = BitBlt(MemDC, 0, 0, screensize.cx, screensize.cy, hScreenDC, 0, 0, SRCCOPY);
+    if bitBltSuccess as i32 == 0 {
+        return;
+    }
+    let mut bitInfo: BITMAPINFO = BITMAPINFO {
+        bmiHeader: BITMAPINFOHEADER {
+            biSize: size_of::<BITMAPINFOHEADER>() as u32,
+            biWidth: rect.right - rect.left,
+            biHeight: rect.bottom - rect.top,
+            biPlanes: 1,
+            biBitCount: 32,
+            biCompression: BI_RGB,
+            biSizeImage: 0,
+            biXPelsPerMeter: 0,
+            biYPelsPerMeter: 0,
+            biClrUsed: 0,
+            biClrImportant: 0,
+        },
+        bmiColors: [RGBQUAD {
+            rgbBlue: 0,
+            rgbGreen: 0,
+            rgbRed: 0,
+            rgbReserved: 0,
+        }; 1],
+    };
+
+
+    let mut result = 0;
+//第一次调用GetDIBits获得图片的大小
+    result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, null_mut(), &mut bitInfo, DIB_RGB_COLORS);
+    bitInfo.bmiHeader.biCompression = BI_RGB;
+    bitInfo.bmiHeader.biPlanes = 1;
+    if result != 0 {
+        //do something
+        let size: usize = bitInfo.bmiHeader.biSizeImage as usize;
+        let mut buffer: Vec<u8>=vec![];
+        for _ in 0..size{
+            buffer.push(0 as u8);
+        }
+        let mut slice:*mut [u8]= buffer.as_mut_slice()  as *mut [u8];
+        //第二次调用GetDIBits取图片流数据
+        result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32,  slice as *mut c_void, &mut bitInfo, DIB_RGB_COLORS);
+
+
+        println!("success");
+    }
+    SelectObject(MemDC, hOldBMP);
+    DeleteObject(MemDC as HGDIOBJ);
+    ReleaseDC(hDeskTopWnd, hScreenDC);
+}
+
 
 #[cfg(windows)]
 unsafe fn print_message() {
@@ -69,9 +146,10 @@ fn bench_rate() {
 }
 
 
-
-
 fn main() {
+
     //bench_rate();
-    unsafe { print_message(); }
+    unsafe { find_color(); }
+
+    unsafe { find_color(); }
 }
