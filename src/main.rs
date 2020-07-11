@@ -33,18 +33,20 @@ unsafe fn print_message() {
         let pixel = GetPixel(hdc, p.x, p.y);
         println!("pixel: {}", pixel);
 
-        let r_c=pixel & 0xFF;
-        let g_c=(pixel & 0xFF00) / 256;
-        let b_c=(pixel & 0xFF0000) / 65536;
+        let rv=pixel & 0xFF;
+        let gv=(pixel & 0xFF00) / 256;
+        let bv=(pixel & 0xFF0000) / 65536;
 
-        println!("R_:{},G_:{},B_:{}", r_c, g_c,b_c);
+        let rv = rv as i32;
+        let gv = gv as i32;
+        let bv = bv as i32;
+
+        println!("R_:{},G_:{},B_:{}", rv, gv,bv);
 
         //mouse::click(p.x as u32,p.y as u32);
-        // if (rv - gv) > 20 && (rv - bv) > 20 {
-        //     println!("may be red");
-        // } else {
-        //     println!("unknow");
-        // }
+        if (rv - gv) > 20 && (rv - bv) > 20 {
+            println!("may be red");
+        }
 
 
         sleep(Duration::from_secs(1));
