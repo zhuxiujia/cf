@@ -61,12 +61,7 @@ fn bench_rate() {
             };
             //GetCursorPos(&mut p);
             //println!("{},{}", &p.x, &p.y);
-
             let pixel = GetPixel(hdc, p.x, p.y);
-
-            let rv = GetRValue(pixel);
-            let gv = GetGValue(pixel);
-            let bv = GetBValue(pixel);
         };
     }
     count_time_qps("", total, now);
