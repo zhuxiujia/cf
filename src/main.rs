@@ -100,7 +100,7 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
             let rv = buffer[(size - i * 4) - 2] as i32;
             let gv = buffer[(size - i * 4) - 3] as i32;
             let bv = buffer[(size - i * 4) - 4] as i32;
-            if is_red(rv,gv,bv,150,20)  {
+            if rv >= 180 && gv <= 60 && bv <= 60 {
                 println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
                 return true;
             }
