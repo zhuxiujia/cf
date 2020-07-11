@@ -5,7 +5,7 @@ pub unsafe fn click(dx: u32, dy: u32) {
     mouse_event(MOUSEEVENTF_LEFTUP, dx, dy, 0, 0);
 }
 
-pub  fn pixel_to_rgb(pixel: u32) {
+pub  fn pixel_to_rgb(pixel: u32) -> (i32,i32,i32) {
     let rv = pixel & 0xFF;
     let gv = (pixel & 0xFF00) / 256;
     let bv = (pixel & 0xFF0000) / 65536;
@@ -24,4 +24,5 @@ pub  fn pixel_to_rgb(pixel: u32) {
     if rg.abs() >= 40 && rb.abs() >= 40 && gb.abs() <= 40 {
         println!("may be red");
     }
+    return (rv,gv,bv);
 }
