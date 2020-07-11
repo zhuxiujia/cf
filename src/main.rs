@@ -100,19 +100,19 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
             let rv = buffer[(size - i * 4) - 2] as i32;
             let gv = buffer[(size - i * 4) - 3] as i32;
             let bv = buffer[(size - i * 4) - 4] as i32;
-            // if is_red(rv,gv,bv,80,40)  {
-            //     return true;
-            //    // println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
-            // }
-
-            let rv_diff = rv - 165;
-            let gv_diff = gv - 58;
-            let bv_diff = bv - 48;
-            let diff=30;
-            if rv_diff.abs() <= diff && gv_diff.abs() <= diff && bv_diff.abs() <= diff {
+            if is_red(rv,gv,bv,150,20)  {
                 println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
                 return true;
             }
+
+            // let rv_diff = rv - 165;
+            // let gv_diff = gv - 58;
+            // let bv_diff = bv - 48;
+            // let diff=30;
+            // if rv_diff.abs() <= diff && gv_diff.abs() <= diff && bv_diff.abs() <= diff {
+            //     println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
+            //     return true;
+            // }
         }
     } else {
         //gc
