@@ -14,7 +14,7 @@ use winapi::ctypes::{c_char, c_void};
 use winapi::shared::minwindef::BYTE;
 use winapi::shared::windef::{HBITMAP, HBITMAP__, HGDIOBJ, POINT, RECT, SIZE};
 use winapi::um::wingdi;
-use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCompatibleBitmap, CreateCompatibleDC, DeleteObject, DIB_RGB_COLORS, GetBValue, GetDIBits, GetGValue, GetPixel, GetRValue, GetTextColor, RGBQUAD, SelectObject, SRCCOPY};
+use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCompatibleBitmap, CreateCompatibleDC, DeleteObject, DIB_RGB_COLORS, GetBValue, GetDIBits, GetGValue, GetPixel, GetRValue, GetTextColor, RGBQUAD, SelectObject, SRCCOPY, DeleteDC};
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
 
 use crate::time_util::count_time_qps;
@@ -88,10 +88,10 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         //第二次调用GetDIBits取图片流数据
         result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, slice as *mut c_void, &mut bitInfo, DIB_RGB_COLORS);
         //gc
-        SelectObject(MemDC, hOldBMP);
         DeleteObject(MemDC as HGDIOBJ);
+        DeleteObject(hOldBMP);
         ReleaseDC(hDeskTopWnd, hScreenDC);
-
+        DeleteDC(hScreenDC);
 
         let mut have_black = false;
         let mut last_i = 0;
@@ -127,9 +127,10 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         }
     } else {
         //gc
-        SelectObject(MemDC, hOldBMP);
         DeleteObject(MemDC as HGDIOBJ);
+        DeleteObject(hOldBMP);
         ReleaseDC(hDeskTopWnd, hScreenDC);
+        DeleteDC(hScreenDC);
     }
     return false;
 }
@@ -194,6 +195,13 @@ unsafe fn loop_find_color() {
 
 
 unsafe fn loop_find_cf_color() {
+
+    for index in 0..5000{
+        let find = find_color(918, 570, 918 + 100, 570 + 57, 0);
+        println!("{}",index);
+    }
+
+    println!("done");
     loop {
         //let find =  find_color(0, 0, 10, 100, 0);;
         let find = find_color(918, 570, 918 + 100, 570 + 57, 0);
