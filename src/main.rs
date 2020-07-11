@@ -186,11 +186,12 @@ unsafe fn loop_find_cf_color() {
         let find=find_color(918, 600, 918+100, 600+17,   0);
         if find{
             click(0,0);
+            println!("click");
         }
     }
 }
 
 fn main() {
     //bench_rate();
-    unsafe { loop_find_color(); }
+    unsafe { loop_find_cf_color(); }
 }
