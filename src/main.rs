@@ -9,13 +9,14 @@ use std::time::SystemTime;
 use winapi::_core::time::Duration;
 use winapi::shared::windef::POINT;
 use winapi::um::wingdi;
-use winapi::um::wingdi::{GetBValue, GetGValue, GetPixel, GetRValue, GetTextColor};
+use winapi::um::wingdi::{GetBValue, GetGValue, GetPixel, GetRValue, GetTextColor, GetDIBits};
 use winapi::um::winuser::{GetCursorPos, GetDC, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, GetWindowDC, GetDesktopWindow, GetTopWindow};
 
 use crate::time_util::count_time_qps;
+use crate::util::pixel_to_rgb;
 
 pub mod time_util;
-pub mod mouse;
+pub mod util;
 
 #[cfg(windows)]
 unsafe fn print_message() {
@@ -33,25 +34,7 @@ unsafe fn print_message() {
         let pixel = GetPixel(hdc, p.x, p.y);
         println!("pixel: {}", pixel);
 
-        let rv=pixel & 0xFF;
-        let gv=(pixel & 0xFF00) / 256;
-        let bv=(pixel & 0xFF0000) / 65536;
-
-        let rv = rv as i32;
-        let gv = gv as i32;
-        let bv = bv as i32;
-
-        println!("R_:{},G_:{},B_:{}", rv, gv,bv);
-
-        //mouse::click(p.x as u32,p.y as u32);
-
-        let rg:i32=(rv - gv);
-        let rb:i32=(rv - bv);
-        let gb:i32=(gv - bv);
-        if rg.abs() >= 40 && rb.abs() >= 40  && gb.abs() <= 40 {
-            println!("may be red");
-        }
-
+        pixel_to_rgb(pixel as u32);
 
         sleep(Duration::from_secs(1));
     }
@@ -94,6 +77,8 @@ fn bench_rate() {
     }
     count_time_qps("", total, now);
 }
+
+
 
 
 fn main() {
