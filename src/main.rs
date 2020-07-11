@@ -18,7 +18,7 @@ use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCom
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
 
 use crate::time_util::count_time_qps;
-use crate::util::{pixel_to_rgb, write_file, is_red};
+use crate::util::{pixel_to_rgb, write_file, is_red, click};
 
 pub mod time_util;
 pub mod util;
@@ -93,6 +93,8 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32,  step: usize)
         ReleaseDC(hDeskTopWnd, hScreenDC);
 
 
+        let mut find_red_count = i32;
+
         let len = size / 4;
         for i in 0..len {
             if step != 0 && i % step != 0 {
@@ -101,8 +103,13 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32,  step: usize)
             let rv = buffer[(size - i * 4) - 2]as i32;
             let gv = buffer[(size - i * 4) - 3]as i32;
             let bv = buffer[(size - i * 4) - 4]as i32;
-            if is_red(rv,gv,bv,80,40) {
-                println!("find    r:{},g:{},b:{}", rv, gv, bv);
+            if is_red(rv,gv,bv,80,40)  {
+                find_red_count += 1;
+               // println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
+            }else{
+                find_red_count = 0;
+            }
+            if find_red_count >=3 {
                 return true;
             }
         }
@@ -169,10 +176,19 @@ fn bench_rate() {
 
 unsafe fn loop_find_color() {
     loop {
-        find_color(0, 0, 100, 100,   0);
+        find_color(0, 0, 10, 100,   0);
     }
 }
 
+
+unsafe fn loop_find_cf_color() {
+    loop {
+        let find=find_color(918, 600, 918+100, 600+17,   0);
+        if find{
+            click(0,0);
+        }
+    }
+}
 
 fn main() {
     //bench_rate();
