@@ -26,12 +26,13 @@ unsafe fn print_message() {
         x: 0,
         y: 0,
     };
-    let hdc = GetDC(null_mut());
+    let hDeskTopWnd = GetDesktopWindow();//获得屏幕的HWND
+    let hScreenDC = GetDC(hDeskTopWnd);//获得屏幕的HDC
     loop {
         GetCursorPos(&mut p);
         println!("point: {},{}", &p.x, &p.y);
 
-        let pixel = GetPixel(hdc, p.x, p.y);
+        let pixel = GetPixel(hScreenDC, p.x, p.y);
         println!("pixel: {}", pixel);
 
         pixel_to_rgb(pixel as u32);
