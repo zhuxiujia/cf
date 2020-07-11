@@ -78,14 +78,12 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
     if result != 0 {
         //do something
         let size: usize = bitInfo.bmiHeader.biSizeImage as usize;
-        let mut buffer: Vec<u8> = vec![];
-        for _ in 0..size {
-            buffer.push(0 as u8);
-        }
-        let mut slice = buffer.as_mut_slice() as *mut [u8];
+
         //第二次调用GetDIBits取图片流数据
-        result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, slice as *mut c_void, &mut bitInfo, DIB_RGB_COLORS);
-        //gc
+        let mut buffer = vec![0u8; size];
+        result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, buffer.as_mut_ptr().cast(), &mut bitInfo, DIB_RGB_COLORS);
+
+       //gc
         DeleteObject(MemDC as HGDIOBJ);
         DeleteObject(hOldBMP);
         ReleaseDC(hDeskTopWnd, hScreenDC);
@@ -193,11 +191,6 @@ unsafe fn loop_find_color() {
 
 
 unsafe fn loop_find_cf_color() {
-
-    for index in 0..5000{
-        let find = find_color(918, 570, 918 + 100, 570 + 57, 0);
-        println!("{}",index);
-    }
 
     println!("done");
     loop {
