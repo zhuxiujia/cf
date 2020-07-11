@@ -26,7 +26,7 @@ pub unsafe fn click_send_input(dx: u32, dy: u32) {
 
 pub unsafe fn click_mouse_event(dx: u32, dy: u32) {
     mouse_event(MOUSEEVENTF_LEFTDOWN, dx, dy, 0, 0);
-    sleep(Duration::from_millis(30));
+    sleep(Duration::from_millis(50));
     mouse_event(MOUSEEVENTF_LEFTUP, dx, dy, 0, 0);
 }
 
