@@ -18,7 +18,7 @@ use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCom
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
 
 use crate::time_util::count_time_qps;
-use crate::util::{pixel_to_rgb, write_file};
+use crate::util::{pixel_to_rgb, write_file, is_red};
 
 pub mod time_util;
 pub mod util;
@@ -31,7 +31,7 @@ pub mod util;
 /// step: 步长
 ///
 #[cfg(windows)]
-unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, r: u8, g: u8, b: u8, diff: i32, step: usize) -> bool{
+unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32,  step: usize) -> bool{
     let hDeskTopWnd = GetDesktopWindow();//获得屏幕的HWND
     let hScreenDC = GetDC(hDeskTopWnd);//获得屏幕的HDC
     let MemDC = CreateCompatibleDC(hScreenDC);//创建一个内存中的DC
@@ -52,7 +52,7 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, r: u8, g: u8,
     let hOldBMP = SelectObject(MemDC, hBitmap as HGDIOBJ);
     let bitBltSuccess = BitBlt(MemDC, 0, 0, screensize.cx, screensize.cy, hScreenDC, 0, 0, SRCCOPY);
     if bitBltSuccess as i32 == 0 {
-        return;
+        return false;
     }
     let mut bitInfo: BITMAPINFO = BITMAPINFO {
         bmiHeader: BITMAPINFOHEADER {
@@ -96,25 +96,17 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, r: u8, g: u8,
         SelectObject(MemDC, hOldBMP);
         DeleteObject(MemDC as HGDIOBJ);
         ReleaseDC(hDeskTopWnd, hScreenDC);
+
+
         let len = size / 4;
         for i in 0..len {
             if step != 0 && i % step != 0 {
                 continue;
             }
-            let rv = buffer[(size - i * 4) - 1] as i32;
-            let gv = buffer[(size - i * 4) - 2]as i32;
-            let bv = buffer[(size - i * 4) - 3]as i32;
-            //println!("r:{},g:{},b:{}",rv,gv,bv);
-
-            let rv_diff = (rv - r as i32);
-            let gv_diff = (gv - g  as i32);
-            let bv_diff = (bv - b  as i32);
-
-            let rv_diff = rv_diff.abs();
-            let gv_diff = gv_diff.abs();
-            let bv_diff = bv_diff.abs();
-
-            if rv_diff <= diff && gv_diff <= diff  && bv_diff <= diff {
+            let rv = buffer[(size - i * 4) - 2]as i32;
+            let gv = buffer[(size - i * 4) - 3]as i32;
+            let bv = buffer[(size - i * 4) - 4]as i32;
+            if is_red(rv,gv,bv,80,40) {
                 println!("find    r:{},g:{},b:{}", rv, gv, bv);
                 return true;
             }
@@ -182,7 +174,7 @@ fn bench_rate() {
 
 unsafe fn loop_find_color() {
     loop {
-        find_color(0, 0, 100, 100, 255, 255, 255, 10, 0);
+        find_color(0, 0, 100, 100,   0);
     }
 }
 
