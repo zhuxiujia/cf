@@ -47,7 +47,7 @@ pub fn pixel_to_rgb(pixel: u32) -> (i32, i32, i32) {
 }
 
 pub fn rgb_is_red(rv: i32, gv: i32, bv: i32) -> bool {
-    if rv >= 160 && gv <= 70 && bv <= 70 {
+    if rv >= 140 && gv <= 70 && bv <= 70 {
        // println!("Is Red   r:{},g:{},b:{}", rv, gv, bv);
         return true;
     } else {
