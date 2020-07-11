@@ -18,7 +18,7 @@ use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCom
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
 
 use crate::time_util::count_time_qps;
-use crate::util::{pixel_to_rgb, write_file, is_red, click};
+use crate::util::{pixel_to_rgb, write_file, is_red, click_send_input};
 
 pub mod time_util;
 pub mod util;
@@ -185,7 +185,7 @@ unsafe fn loop_find_cf_color() {
     loop {
         let find=find_color(918, 600, 918+100, 600+17,   0);
         if find{
-            click(0,0);
+            click_send_input(0,0);
             println!("click");
         }
     }

@@ -1,14 +1,29 @@
 use std::fs::File;
 use std::io::Write;
 
-use winapi::um::winuser::{GetCursorPos, GetDC, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP};
+use winapi::um::winuser::{INPUT_u, GetCursorPos, GetDC, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, SendInput, INPUT, INPUT_MOUSE, MOUSEINPUT, MOUSEEVENTF_ABSOLUTE, MOUSEEVENTF_MOVE};
 use std::thread::sleep;
-use winapi::_core::time::Duration;
+use winapi::_core::mem::size_of;
+use std::time::Duration;
 
-pub unsafe fn click(dx: u32, dy: u32) {
-    mouse_event(MOUSEEVENTF_LEFTDOWN, dx, dy, 0, 0);
-    sleep(Duration::from_millis(30));
-    mouse_event(MOUSEEVENTF_LEFTUP, dx, dy, 0, 0);
+pub unsafe fn click_send_input(dx: u32, dy: u32) {
+    // mouse_event(MOUSEEVENTF_LEFTDOWN, dx, dy, 0, 0);
+    // sleep(Duration::from_millis(30));
+    // mouse_event(MOUSEEVENTF_LEFTUP, dx, dy, 0, 0);
+
+    let mut input=INPUT{ type_: INPUT_MOUSE, u: INPUT_u::default()};
+    let mi= input.u.mi_mut();
+    mi.dx=0;
+    mi.dy=0;
+    mi.dwFlags= MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP;
+
+    SendInput(1, &mut input, size_of::<INPUT>() as i32);
+}
+
+pub unsafe fn click_mouse_event(dx: u32, dy: u32) {
+     mouse_event(MOUSEEVENTF_LEFTDOWN, dx, dy, 0, 0);
+     sleep(Duration::from_millis(30));
+     mouse_event(MOUSEEVENTF_LEFTUP, dx, dy, 0, 0);
 }
 
 pub fn pixel_to_rgb(pixel: u32) -> (i32, i32, i32) {
