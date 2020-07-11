@@ -24,19 +24,25 @@ pub mod time_util;
 pub mod util;
 
 
+///
+///
+///
+/// diff: 误差值
+/// step: 步长
+///
 #[cfg(windows)]
-unsafe fn find_color() {
+unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, r: u8, g: u8, b: u8, diff: i32, step: usize) -> bool{
     let hDeskTopWnd = GetDesktopWindow();//获得屏幕的HWND
     let hScreenDC = GetDC(hDeskTopWnd);//获得屏幕的HDC
     let MemDC = CreateCompatibleDC(hScreenDC);//创建一个内存中的DC
     let mut rect: RECT = RECT {
-        left: 0,
-        top: 0,
-        right: 100,
-        bottom: 100,
+        left: left as i32,
+        top: top as i32,
+        right: right as i32,
+        bottom: bottom as i32,
     };
-   //获取屏幕尺寸
-   // GetWindowRect(hDeskTopWnd, &mut rect);
+    //获取屏幕尺寸
+    // GetWindowRect(hDeskTopWnd, &mut rect);
     let mut screensize = SIZE { cx: 0, cy: 0 };
     screensize.cx = rect.right - rect.left;
     screensize.cy = rect.bottom - rect.top;
@@ -79,21 +85,47 @@ unsafe fn find_color() {
     if result != 0 {
         //do something
         let size: usize = bitInfo.bmiHeader.biSizeImage as usize;
-        let mut buffer: Vec<u8>=vec![];
-        for _ in 0..size{
+        let mut buffer: Vec<u8> = vec![];
+        for _ in 0..size {
             buffer.push(0 as u8);
         }
-        let mut slice= buffer.as_mut_slice()  as *mut [u8];
+        let mut slice = buffer.as_mut_slice() as *mut [u8];
         //第二次调用GetDIBits取图片流数据
-        result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32,  slice as *mut c_void, &mut bitInfo, DIB_RGB_COLORS);
+        result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, slice as *mut c_void, &mut bitInfo, DIB_RGB_COLORS);
+        //gc
+        SelectObject(MemDC, hOldBMP);
+        DeleteObject(MemDC as HGDIOBJ);
+        ReleaseDC(hDeskTopWnd, hScreenDC);
+        let len = size / 4;
+        for i in 0..len {
+            if step != 0 && i % step != 0 {
+                continue;
+            }
+            let rv = buffer[(size - i * 4) - 1] as i32;
+            let gv = buffer[(size - i * 4) - 2]as i32;
+            let bv = buffer[(size - i * 4) - 3]as i32;
+            //println!("r:{},g:{},b:{}",rv,gv,bv);
 
-        write_file(&buffer);
+            let rv_diff = (rv - r as i32);
+            let gv_diff = (gv - g  as i32);
+            let bv_diff = (bv - b  as i32);
 
-        println!("success");
+            let rv_diff = rv_diff.abs();
+            let gv_diff = gv_diff.abs();
+            let bv_diff = bv_diff.abs();
+
+            if rv_diff <= diff && gv_diff <= diff  && bv_diff <= diff {
+                println!("find    r:{},g:{},b:{}", rv, gv, bv);
+                return true;
+            }
+        }
+    } else {
+        //gc
+        SelectObject(MemDC, hOldBMP);
+        DeleteObject(MemDC as HGDIOBJ);
+        ReleaseDC(hDeskTopWnd, hScreenDC);
     }
-    SelectObject(MemDC, hOldBMP);
-    DeleteObject(MemDC as HGDIOBJ);
-    ReleaseDC(hDeskTopWnd, hScreenDC);
+    return false;
 }
 
 
@@ -148,8 +180,14 @@ fn bench_rate() {
 }
 
 
-fn main() {
+unsafe fn loop_find_color() {
+    loop {
+        find_color(0, 0, 100, 100, 255, 255, 255, 10, 0);
+    }
+}
 
+
+fn main() {
     //bench_rate();
-    unsafe { find_color(); }
+    unsafe { loop_find_color(); }
 }
