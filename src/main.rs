@@ -188,7 +188,6 @@ unsafe fn loop_find_cf_color() {
         let find = find_color(918, 570, 918 + 100, 570 + 57, 0);
         if find {
             click_send_input(0, 0);
-            println!("click");
         }
     }
 }
