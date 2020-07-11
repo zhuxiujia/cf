@@ -13,9 +13,10 @@ pub unsafe fn click_send_input(dx: u32, dy: u32) {
     mi.dy = 0;
     mi.dwFlags = MOUSEEVENTF_LEFTDOWN;
     SendInput(1, &mut input, size_of::<INPUT>() as i32);
-    sleep(Duration::from_millis(40));
-
     drop(input);
+
+
+    sleep(Duration::from_millis(40));
 
     let mut input = INPUT { type_: INPUT_MOUSE, u: INPUT_u::default() };
     let mi = input.u.mi_mut();
@@ -52,6 +53,16 @@ pub fn rgb_is_red(rv: i32, gv: i32, bv: i32) -> bool {
         return true;
     } else {
        // println!("Not Red  R_:{},G_:{},B_:{}", rv, gv, bv);
+        return false;
+    }
+}
+
+pub fn rgb_is_black(rv: i32, gv: i32, bv: i32) -> bool {
+    if rv == 0 && gv == 0 && bv== 0 {
+        // println!("Is Red   r:{},g:{},b:{}", rv, gv, bv);
+        return true;
+    } else {
+        // println!("Not Red  R_:{},G_:{},B_:{}", rv, gv, bv);
         return false;
     }
 }
