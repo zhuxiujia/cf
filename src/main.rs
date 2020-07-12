@@ -12,7 +12,8 @@ use winapi::_core::str::Chars;
 use winapi::_core::time::Duration;
 use winapi::ctypes::{c_char, c_void};
 use winapi::shared::minwindef::BYTE;
-use winapi::shared::windef::{HBITMAP, HBITMAP__, HGDIOBJ, POINT, RECT, SIZE, HWND};
+use winapi::shared::windef::{HBITMAP, HBITMAP__, HGDIOBJ, HWND, POINT, RECT, SIZE};
+use winapi::um::errhandlingapi::GetLastError;
 use winapi::um::wingdi;
 use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCompatibleBitmap, CreateCompatibleDC, DeleteDC, DeleteObject, DIB_RGB_COLORS, GetBValue, GetDIBits, GetGValue, GetPixel, GetRValue, GetTextColor, RGBQUAD, SelectObject, SRCCOPY};
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
@@ -46,6 +47,14 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
     let h_old_bmp = SelectObject(mem_dc, h_bitmap as HGDIOBJ);
     let bit_blt_success = BitBlt(mem_dc, 0, 0, screensize.cx, screensize.cy, h_screen_dc, rect.left, rect.top, SRCCOPY);
     if bit_blt_success as i32 == 0 {
+        //注意释放资源
+        DeleteObject(mem_dc as HGDIOBJ);
+        DeleteObject(h_old_bmp);
+        DeleteObject(h_bitmap as HGDIOBJ);
+        DeleteDC(h_screen_dc);
+        DeleteDC(mem_dc);
+        ReleaseDC(h_screen_dc as HWND, mem_dc);
+        ReleaseDC(null_mut(), h_screen_dc);
         return false;
     }
     let mut bit_info: BITMAPINFO = BITMAPINFO {
@@ -70,6 +79,8 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         }; 1],
     };
 
+    let mut is_find_color = false;
+
     let mut result = 0;
     //第一次调用GetDIBits获得图片的大小
     result = GetDIBits(mem_dc, h_bitmap, 0, screensize.cy as u32, null_mut(), &mut bit_info, DIB_RGB_COLORS);
@@ -85,53 +96,51 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         let ptr = buffer.as_mut_ptr().cast();
         result = GetDIBits(mem_dc, h_bitmap, 0, screensize.cy as u32, ptr, &mut bit_info, DIB_RGB_COLORS);
 
-        //gc
-        DeleteObject(mem_dc as HGDIOBJ);
-        DeleteObject(h_old_bmp);
-        ReleaseDC(h_screen_dc as HWND,mem_dc);
-        ReleaseDC(null_mut(),h_screen_dc);
-        DeleteDC(h_screen_dc);
-        DeleteDC(mem_dc);
-
-        if result == 0{
+        if result == 0 {
             println!("2设置图片信息出错");
-            return false;
-        }
+            is_find_color = false;
+        }else{
+            let mut have_black = false;
+            let mut last_i = 0;
 
-        let mut have_black = false;
-        let mut last_i = 0;
+            let len = size / 4;
+            for i in 0..len {
+                if step != 0 && i % step != 0 {
+                    continue;
+                }
+                let rv = buffer[(size - i * 4) - 2] as i32;
+                let gv = buffer[(size - i * 4) - 3] as i32;
+                let bv = buffer[(size - i * 4) - 4] as i32;
 
+                if rgb_is_black(rv, gv, bv) {
+                    have_black = true;
+                    last_i = i;
+                }
 
-        let len = size / 4;
-        for i in 0..len {
-            if step != 0 && i % step != 0 {
-                continue;
-            }
-            let rv = buffer[(size - i * 4) - 2] as i32;
-            let gv = buffer[(size - i * 4) - 3] as i32;
-            let bv = buffer[(size - i * 4) - 4] as i32;
-
-            if rgb_is_black(rv, gv, bv) {
-                have_black = true;
-                last_i = i;
-            }
-
-            if rgb_is_red(rv, gv, bv) && have_black && last_i + 1 == i {
-                //println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
-                return true;
+                if rgb_is_red(rv, gv, bv) && have_black && last_i + 1 == i {
+                    //println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
+                    is_find_color = true;
+                    break;
+                }
             }
         }
     } else {
-        println!("1设置图片信息出错");
+        let e = GetLastError();
+        println!("1设置图片信息出错,code: {}", e);
     }
     //gc
     DeleteObject(mem_dc as HGDIOBJ);
     DeleteObject(h_old_bmp);
-    ReleaseDC(h_screen_dc as HWND,mem_dc);
-    ReleaseDC(null_mut(),h_screen_dc);
+    DeleteObject(h_bitmap as HGDIOBJ);
     DeleteDC(h_screen_dc);
     DeleteDC(mem_dc);
-    return false;
+    ReleaseDC(h_screen_dc as HWND, mem_dc);
+    ReleaseDC(null_mut(), h_screen_dc);
+    return is_find_color;
+}
+
+unsafe fn do_release(){
+
 }
 
 
