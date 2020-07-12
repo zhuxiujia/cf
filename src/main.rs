@@ -48,13 +48,13 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
     let bit_blt_success = BitBlt(mem_dc, 0, 0, screensize.cx, screensize.cy, h_screen_dc, rect.left, rect.top, SRCCOPY);
     if bit_blt_success as i32 == 0 {
         //注意释放资源
-        DeleteObject(mem_dc as HGDIOBJ);
-        DeleteObject(h_old_bmp);
-        DeleteObject(h_bitmap as HGDIOBJ);
         DeleteDC(h_screen_dc);
         DeleteDC(mem_dc);
         ReleaseDC(h_screen_dc as HWND, mem_dc);
         ReleaseDC(null_mut(), h_screen_dc);
+        DeleteObject(mem_dc as HGDIOBJ);
+        DeleteObject(h_old_bmp);
+        DeleteObject(h_bitmap as HGDIOBJ);
         return false;
     }
     let mut bit_info: BITMAPINFO = BITMAPINFO {
@@ -129,13 +129,13 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         println!("1设置图片信息出错,code: {}", e);
     }
     //gc
-    DeleteObject(mem_dc as HGDIOBJ);
-    DeleteObject(h_old_bmp);
-    DeleteObject(h_bitmap as HGDIOBJ);
     DeleteDC(h_screen_dc);
     DeleteDC(mem_dc);
     ReleaseDC(h_screen_dc as HWND, mem_dc);
     ReleaseDC(null_mut(), h_screen_dc);
+    DeleteObject(mem_dc as HGDIOBJ);
+    DeleteObject(h_old_bmp);
+    DeleteObject(h_bitmap as HGDIOBJ);
     return is_find_color;
 }
 
