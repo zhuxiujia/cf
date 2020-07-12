@@ -14,11 +14,11 @@ use winapi::ctypes::{c_char, c_void};
 use winapi::shared::minwindef::BYTE;
 use winapi::shared::windef::{HBITMAP, HBITMAP__, HGDIOBJ, POINT, RECT, SIZE};
 use winapi::um::wingdi;
-use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCompatibleBitmap, CreateCompatibleDC, DeleteObject, DIB_RGB_COLORS, GetBValue, GetDIBits, GetGValue, GetPixel, GetRValue, GetTextColor, RGBQUAD, SelectObject, SRCCOPY, DeleteDC};
+use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCompatibleBitmap, CreateCompatibleDC, DeleteDC, DeleteObject, DIB_RGB_COLORS, GetBValue, GetDIBits, GetGValue, GetPixel, GetRValue, GetTextColor, RGBQUAD, SelectObject, SRCCOPY};
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
 
 use crate::time_util::count_time_qps;
-use crate::util::{click_send_input, is_red, pixel_to_rgb, rgb_is_black, rgb_is_red, write_file, click_mouse_event};
+use crate::util::{click_mouse_event, click_send_input, is_red, pixel_to_rgb, rgb_is_black, rgb_is_red, write_file};
 
 pub mod time_util;
 pub mod util;
@@ -71,19 +71,21 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         }; 1],
     };
 
-
     let mut result = 0;
-//第一次调用GetDIBits获得图片的大小
+    //第一次调用GetDIBits获得图片的大小
     result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, null_mut(), &mut bitInfo, DIB_RGB_COLORS);
     if result != 0 {
-        //do something
-        let size: usize = bitInfo.bmiHeader.biSizeImage as usize;
+        // 位图信息及调色板大小
+        let infoSize = bitInfo.bmiHeader.biSize + bitInfo.bmiHeader.biClrUsed * size_of::<RGBQUAD>() as u32;
 
-        //第二次调用GetDIBits取图片流数据
+        let size: usize = bitInfo.bmiHeader.biSizeImage as usize + infoSize as usize;
+
+        //缓存 第二次调用GetDIBits取图片流数据
         let mut buffer = vec![0u8; size];
-        result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, buffer.as_mut_ptr().cast(), &mut bitInfo, DIB_RGB_COLORS);
+        let ptr = buffer.as_mut_ptr().cast();
+        result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, ptr, &mut bitInfo, DIB_RGB_COLORS);
 
-       //gc
+        //gc
         DeleteObject(MemDC as HGDIOBJ);
         DeleteObject(hOldBMP);
         ReleaseDC(hDeskTopWnd, hScreenDC);
@@ -191,7 +193,6 @@ unsafe fn loop_find_color() {
 
 
 unsafe fn loop_find_cf_color() {
-
     println!("done");
     loop {
         //let find =  find_color(0, 0, 10, 100, 0);;
