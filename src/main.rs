@@ -27,8 +27,7 @@ pub mod util;
 /// step: 步长
 #[cfg(windows)]
 unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) -> bool {
-    let h_desk_top_wnd = GetDesktopWindow();//获得屏幕的HWND
-    let h_screen_dc = GetDC(h_desk_top_wnd);//获得屏幕的HDC
+    let h_screen_dc = GetDC(null_mut());//获得屏幕的HDC
     let mem_dc = CreateCompatibleDC(h_screen_dc);//创建一个内存中的DC
     let mut rect: RECT = RECT {
         left: left as i32,
@@ -89,7 +88,6 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         //gc
         DeleteObject(mem_dc as HGDIOBJ);
         DeleteObject(h_old_bmp);
-        ReleaseDC(h_desk_top_wnd, h_screen_dc);
         DeleteDC(h_screen_dc);
 
         if result == 0{
@@ -130,12 +128,12 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
             // }
         }
     } else {
-        println!("设置图片信息出错");
         //gc
         DeleteObject(mem_dc as HGDIOBJ);
         DeleteObject(h_old_bmp);
-        ReleaseDC(h_desk_top_wnd, h_screen_dc);
         DeleteDC(h_screen_dc);
+
+        println!("设置图片信息出错");
     }
     return false;
 }
