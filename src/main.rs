@@ -55,7 +55,7 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
             biWidth: screensize.cx,
             biHeight: screensize.cy,
             biPlanes: 1,
-            biBitCount: 32,
+            biBitCount: 24,
             biCompression: BI_RGB,
             biSizeImage: 0,
             biXPelsPerMeter: 0,
