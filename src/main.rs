@@ -120,27 +120,17 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
                 //println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
                 return true;
             }
-
-            // let rv_diff = rv - 165;
-            // let gv_diff = gv - 58;
-            // let bv_diff = bv - 48;
-            // let diff=30;
-            // if rv_diff.abs() <= diff && gv_diff.abs() <= diff && bv_diff.abs() <= diff {
-            //     println!("find  red   r:{},g:{},b:{}", rv, gv, bv);
-            //     return true;
-            // }
         }
     } else {
-        //gc
-        DeleteObject(mem_dc as HGDIOBJ);
-        DeleteObject(h_old_bmp);
-        ReleaseDC(h_screen_dc as HWND,mem_dc);
-        ReleaseDC(null_mut(),h_screen_dc);
-        DeleteDC(h_screen_dc);
-        DeleteDC(mem_dc);
-
         println!("1设置图片信息出错");
     }
+    //gc
+    DeleteObject(mem_dc as HGDIOBJ);
+    DeleteObject(h_old_bmp);
+    ReleaseDC(h_screen_dc as HWND,mem_dc);
+    ReleaseDC(null_mut(),h_screen_dc);
+    DeleteDC(h_screen_dc);
+    DeleteDC(mem_dc);
     return false;
 }
 
