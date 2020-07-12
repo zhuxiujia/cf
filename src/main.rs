@@ -27,9 +27,9 @@ pub mod util;
 /// step: 步长
 #[cfg(windows)]
 unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) -> bool {
-    let hDeskTopWnd = GetDesktopWindow();//获得屏幕的HWND
-    let hScreenDC = GetDC(hDeskTopWnd);//获得屏幕的HDC
-    let MemDC = CreateCompatibleDC(hScreenDC);//创建一个内存中的DC
+    let h_desk_top_wnd = GetDesktopWindow();//获得屏幕的HWND
+    let h_screen_dc = GetDC(h_desk_top_wnd);//获得屏幕的HDC
+    let mem_dc = CreateCompatibleDC(h_screen_dc);//创建一个内存中的DC
     let mut rect: RECT = RECT {
         left: left as i32,
         top: top as i32,
@@ -37,19 +37,19 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         bottom: bottom as i32,
     };
     //获取屏幕尺寸
-    // GetWindowRect(hDeskTopWnd, &mut rect);
+    // GetWindowRect(h_desk_top_wnd, &mut rect);
     let mut screensize = SIZE { cx: 0, cy: 0 };
     screensize.cx = rect.right - rect.left;
     screensize.cy = rect.bottom - rect.top;
 
-    let mut hBitmap: HBITMAP;
-    hBitmap = CreateCompatibleBitmap(hScreenDC, screensize.cx, screensize.cy);
-    let hOldBMP = SelectObject(MemDC, hBitmap as HGDIOBJ);
-    let bitBltSuccess = BitBlt(MemDC, 0, 0, screensize.cx, screensize.cy, hScreenDC, rect.left, rect.top, SRCCOPY);
-    if bitBltSuccess as i32 == 0 {
+    let mut h_bitmap: HBITMAP;
+    h_bitmap = CreateCompatibleBitmap(h_screen_dc, screensize.cx, screensize.cy);
+    let h_old_bmp = SelectObject(mem_dc, h_bitmap as HGDIOBJ);
+    let bit_blt_success = BitBlt(mem_dc, 0, 0, screensize.cx, screensize.cy, h_screen_dc, rect.left, rect.top, SRCCOPY);
+    if bit_blt_success as i32 == 0 {
         return false;
     }
-    let mut bitInfo: BITMAPINFO = BITMAPINFO {
+    let mut bit_info: BITMAPINFO = BITMAPINFO {
         bmiHeader: BITMAPINFOHEADER {
             biSize: size_of::<BITMAPINFOHEADER>() as u32,
             biWidth: screensize.cx,
@@ -73,23 +73,29 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
 
     let mut result = 0;
     //第一次调用GetDIBits获得图片的大小
-    result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, null_mut(), &mut bitInfo, DIB_RGB_COLORS);
+    result = GetDIBits(mem_dc, h_bitmap, 0, screensize.cy as u32, null_mut(), &mut bit_info, DIB_RGB_COLORS);
     if result != 0 {
+        //第二次调用GetDIBits取图片流数据
         // 位图信息及调色板大小
-        let infoSize = bitInfo.bmiHeader.biSize + bitInfo.bmiHeader.biClrUsed * size_of::<RGBQUAD>() as u32;
+        let info_size = bit_info.bmiHeader.biSize + bit_info.bmiHeader.biClrUsed * size_of::<RGBQUAD>() as u32;
+        //缓冲区大小
+        let size: usize = bit_info.bmiHeader.biSizeImage as usize + info_size as usize;
 
-        let size: usize = bitInfo.bmiHeader.biSizeImage as usize + infoSize as usize;
-
-        //缓存 第二次调用GetDIBits取图片流数据
+        //缓存
         let mut buffer = vec![0u8; size];
         let ptr = buffer.as_mut_ptr().cast();
-        result = GetDIBits(MemDC, hBitmap, 0, screensize.cy as u32, ptr, &mut bitInfo, DIB_RGB_COLORS);
+        result = GetDIBits(mem_dc, h_bitmap, 0, screensize.cy as u32, ptr, &mut bit_info, DIB_RGB_COLORS);
 
         //gc
-        DeleteObject(MemDC as HGDIOBJ);
-        DeleteObject(hOldBMP);
-        ReleaseDC(hDeskTopWnd, hScreenDC);
-        DeleteDC(hScreenDC);
+        DeleteObject(mem_dc as HGDIOBJ);
+        DeleteObject(h_old_bmp);
+        ReleaseDC(h_desk_top_wnd, h_screen_dc);
+        DeleteDC(h_screen_dc);
+
+        if result == 0{
+            println!("设置图片信息出错");
+            return false;
+        }
 
         let mut have_black = false;
         let mut last_i = 0;
@@ -124,11 +130,12 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
             // }
         }
     } else {
+        println!("设置图片信息出错");
         //gc
-        DeleteObject(MemDC as HGDIOBJ);
-        DeleteObject(hOldBMP);
-        ReleaseDC(hDeskTopWnd, hScreenDC);
-        DeleteDC(hScreenDC);
+        DeleteObject(mem_dc as HGDIOBJ);
+        DeleteObject(h_old_bmp);
+        ReleaseDC(h_desk_top_wnd, h_screen_dc);
+        DeleteDC(h_screen_dc);
     }
     return false;
 }
