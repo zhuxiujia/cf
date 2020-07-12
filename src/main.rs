@@ -12,7 +12,7 @@ use winapi::_core::str::Chars;
 use winapi::_core::time::Duration;
 use winapi::ctypes::{c_char, c_void};
 use winapi::shared::minwindef::BYTE;
-use winapi::shared::windef::{HBITMAP, HBITMAP__, HGDIOBJ, POINT, RECT, SIZE};
+use winapi::shared::windef::{HBITMAP, HBITMAP__, HGDIOBJ, POINT, RECT, SIZE, HWND};
 use winapi::um::wingdi;
 use winapi::um::wingdi::{BI_RGB, BitBlt, BITMAPINFO, BITMAPINFOHEADER, CreateCompatibleBitmap, CreateCompatibleDC, DeleteDC, DeleteObject, DIB_RGB_COLORS, GetBValue, GetDIBits, GetGValue, GetPixel, GetRValue, GetTextColor, RGBQUAD, SelectObject, SRCCOPY};
 use winapi::um::winuser::{GetCursorPos, GetDC, GetDesktopWindow, GetTopWindow, GetWindowDC, GetWindowRect, mouse_event, MOUSEEVENTF_LEFTDOWN, MOUSEEVENTF_LEFTUP, ReleaseDC};
@@ -88,6 +88,8 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         //gc
         DeleteObject(mem_dc as HGDIOBJ);
         DeleteObject(h_old_bmp);
+        ReleaseDC(null_mut(),h_screen_dc);
+        ReleaseDC(h_screen_dc as HWND,mem_dc);
         DeleteDC(h_screen_dc);
         DeleteDC(mem_dc);
 
@@ -132,6 +134,8 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         //gc
         DeleteObject(mem_dc as HGDIOBJ);
         DeleteObject(h_old_bmp);
+        ReleaseDC(null_mut(),h_screen_dc);
+        ReleaseDC(h_screen_dc as HWND,mem_dc);
         DeleteDC(h_screen_dc);
         DeleteDC(mem_dc);
 
