@@ -89,9 +89,10 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         DeleteObject(mem_dc as HGDIOBJ);
         DeleteObject(h_old_bmp);
         DeleteDC(h_screen_dc);
+        DeleteDC(mem_dc);
 
         if result == 0{
-            println!("设置图片信息出错");
+            println!("2设置图片信息出错");
             return false;
         }
 
@@ -132,8 +133,9 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         DeleteObject(mem_dc as HGDIOBJ);
         DeleteObject(h_old_bmp);
         DeleteDC(h_screen_dc);
+        DeleteDC(mem_dc);
 
-        println!("设置图片信息出错");
+        println!("1设置图片信息出错");
     }
     return false;
 }
