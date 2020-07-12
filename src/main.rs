@@ -139,10 +139,6 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
     return is_find_color;
 }
 
-unsafe fn do_release(){
-
-}
-
 
 #[cfg(windows)]
 unsafe fn print_message() {
