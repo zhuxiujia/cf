@@ -88,8 +88,8 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         //gc
         DeleteObject(mem_dc as HGDIOBJ);
         DeleteObject(h_old_bmp);
-        ReleaseDC(null_mut(),h_screen_dc);
         ReleaseDC(h_screen_dc as HWND,mem_dc);
+        ReleaseDC(null_mut(),h_screen_dc);
         DeleteDC(h_screen_dc);
         DeleteDC(mem_dc);
 
@@ -134,8 +134,8 @@ unsafe fn find_color(left: u32, top: u32, right: u32, bottom: u32, step: usize) 
         //gc
         DeleteObject(mem_dc as HGDIOBJ);
         DeleteObject(h_old_bmp);
-        ReleaseDC(null_mut(),h_screen_dc);
         ReleaseDC(h_screen_dc as HWND,mem_dc);
+        ReleaseDC(null_mut(),h_screen_dc);
         DeleteDC(h_screen_dc);
         DeleteDC(mem_dc);
 
