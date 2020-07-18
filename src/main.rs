@@ -207,6 +207,7 @@ unsafe fn loop_find_cf_color() {
             click_mouse_event(0, 0);
             //println!("click");
         }
+        sleep(Duration::from_millis(100));
     }
 }
 
